@@ -58,12 +58,3 @@ const Knight = (currentPosition) => {
         changePosition
     };
 };
-
-const newKnight = Knight([0,0]);
-console.log(newKnight.getCurrentPosition());
-console.log(newKnight.getPossiblePositions());
-let nextPosition = newKnight.getPossiblePositions()[0];
-console.log(nextPosition);
-console.log(newKnight.changePosition(nextPosition));
-console.log(newKnight.getCurrentPosition());
-console.log(newKnight.getPossiblePositions());
