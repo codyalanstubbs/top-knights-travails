@@ -52,7 +52,6 @@ const Knight = (currentPosition) => {
 
     const changePosition = (nextPosition) => {currentPosition = nextPosition; return currentPosition};
     
-
     return { 
         getCurrentPosition, 
         getPossiblePositions, 
