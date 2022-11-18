@@ -101,7 +101,7 @@ var doBFS = function (graph, source, sourceData) {
 
     bfsInfo[source].distance = 0;
     bfsInfo[source].data = sourceData;
-console.log(bfsInfo);
+// console.log(bfsInfo);
     var queue = new Queue();
     queue.enqueue(source);
 
@@ -164,8 +164,9 @@ const knightMoves = (currentPosition, end, adjList = [], predecessor) => {
         return knightMoves(currentPosition + 1, end, adjList, currentPosition);
     }
 
-
-    console.log(endingMoves)
+    const movesToEnd = findPredecessorMoves(endingMoves[0], bfsInfo);
+    // console.log(endingMoves)
+    console.log(movesToEnd)
 }
 
 const checkBFSInfoForEndPos = (bfsInfo, end) => {
@@ -178,6 +179,13 @@ const checkBFSInfoForEndPos = (bfsInfo, end) => {
 
 const checkMoveIsEndPos = (movePosition, end) => {
     return movePosition[0] === end[0] && movePosition[1] === end[1];
+}
+
+const findPredecessorMoves = (endMove, bfsInfo, movesToEnd = []) => {
+    const predecessor = endMove.predecessor;
+    movesToEnd.unshift(endMove.data);
+    if (predecessor !== null) return findPredecessorMoves(bfsInfo[predecessor], bfsInfo, movesToEnd);
+    return movesToEnd;
 }
 
 knightMoves([0,0], [1,2]);
