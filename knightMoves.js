@@ -66,46 +66,6 @@ const Knight = (currentPosition) => {
     };
 };
 
-const knightMoves = (aKnight, end) => {
-    const x = aKnight.getCurrentPosition()[0];
-    const y = aKnight.getCurrentPosition()[1];
-    if (x === end[0] && y === end[1]) return "end";
-
-    const possibilities = aKnight.getPossiblePositions();
-    for (let i = 0; i < possibilities.length; i++) {
-        possibilities[i] = possibilities[i].join("");
-    }
-
-    if (possibilities.includes(end.join(""))) {
-        console.log("It's there!");
-        console.log(possibilities.indexOf(end.join("")));
-    } else {
-        knightMoves()
-    }  
-    console.log(possibilities);
-}
-
-knightMoves(Knight([0,0]), [1,2]);
-
-// var adjList = [
-//     [[1,2,3,4,5,6,7,8], ["d0"]],
-//     [[0,9,10,11,12,13,14,15,16], ["d1"]],
-//     [[0], ["d2"]],
-//     [[0], ["d3"]],
-//     [[0], ["d4"]],
-//     [[0], ["d5"]],
-//     [[0], ["d6"]],
-//     [[0], ["d7"]],
-//     [[0], ["d8"]],
-//     [[1], ["d9"]],
-//     [[1], ["d10"]],
-//     [[1], ["d11"]],
-//     [[1], ["d12"]],
-//     [[1], ["d13"]],
-//     [[1], ["d14"]],
-//     [[1], ["d15"]],
-//     [[1], ["d16"]]
-// ];
 
 /* A Queue object for queue-like functionality over JavaScript arrays. */
 var Queue = function () {
@@ -141,7 +101,7 @@ var doBFS = function (graph, source, sourceData) {
 
     bfsInfo[source].distance = 0;
     bfsInfo[source].data = sourceData;
-
+console.log(bfsInfo);
     var queue = new Queue();
     queue.enqueue(source);
 
@@ -168,3 +128,32 @@ var doBFS = function (graph, source, sourceData) {
     }
     return bfsInfo;
 };
+
+
+const knightMoves = (currentPosition, end, adjList = [], predecessor) => {
+    const currentKnight = Knight(currentPosition);
+    const possibleMoves = currentKnight.getPossiblePositions();
+    const currentIndex = adjList.length;
+    let listLength;
+
+    adjList[currentIndex] = [];
+    // Add current position to adjency list
+    if (predecessor === undefined) {
+        adjList[currentIndex].push([]);
+    } else {
+        adjList[currentIndex].push([predecessor]);
+    }
+    adjList[currentIndex][1] = currentPosition;
+
+    // Add possible moves from current to adjency list
+    possibleMoves.forEach((move) => {
+        listLength = adjList.length;
+        adjList[currentIndex][0].push(listLength);
+        adjList[listLength] = [[currentIndex], move];
+    })
+    // console.log("adjList: ", adjList)
+    const bfsInfo = doBFS(adjList, currentIndex, currentPosition);
+    console.log(bfsInfo);
+}
+
+knightMoves([0,0], [1,2]);
