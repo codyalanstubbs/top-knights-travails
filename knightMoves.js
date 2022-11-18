@@ -151,9 +151,33 @@ const knightMoves = (currentPosition, end, adjList = [], predecessor) => {
         adjList[currentIndex][0].push(listLength);
         adjList[listLength] = [[currentIndex], move];
     })
-    // console.log("adjList: ", adjList)
+
+    // Do a breadth-first search on the adjacency list to get 
+    // distance and predecessor information for each possible move
     const bfsInfo = doBFS(adjList, currentIndex, currentPosition);
-    console.log(bfsInfo);
+
+    // Check the BFS results for any moves with the end possiiton
+    // and return as an array
+    const endingMoves = checkBFSInfoForEndPos(bfsInfo, end);
+    
+    if (endingMoves.length === 0) {
+        return knightMoves(currentPosition + 1, end, adjList, currentPosition);
+    }
+
+
+    console.log(endingMoves)
+}
+
+const checkBFSInfoForEndPos = (bfsInfo, end) => {
+    let endingMoves = [];
+    bfsInfo.forEach((move) => {
+        if (checkMoveIsEndPos(move.data, end)) endingMoves.push(move)
+    });
+    return endingMoves;
+}
+
+const checkMoveIsEndPos = (movePosition, end) => {
+    return movePosition[0] === end[0] && movePosition[1] === end[1];
 }
 
 knightMoves([0,0], [1,2]);
