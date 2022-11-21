@@ -66,6 +66,8 @@ const Knight = (currentPosition) => {
     };
 };
 
+// Queue object and doBFS below from the khan academy challenge: https://www.khanacademy.org/computing/computer-science/algorithms/breadth-first-search/pc/challenge-implement-breadth-first-search
+// Modified the doBFS slightly to have position data in bfsInfo
 
 /* A Queue object for queue-like functionality over JavaScript arrays. */
 var Queue = function () {
@@ -101,7 +103,7 @@ var doBFS = function (graph, source, sourceData) {
 
     bfsInfo[source].distance = 0;
     bfsInfo[source].data = sourceData;
-// console.log(bfsInfo);
+
     var queue = new Queue();
     queue.enqueue(source);
 
@@ -111,18 +113,22 @@ var doBFS = function (graph, source, sourceData) {
         let u = queue.dequeue();
         //  For each neighbor v of u...
         for (let i = 0; i < graph[u][0].length; i++) {
-            let v = graph[u][0][i];
-            // ...that has not been visited:
-            if (bfsInfo[v].distance === null) {
-                
-                bfsInfo[v] = {
-                    distance: bfsInfo[u].distance + 1, // Set distance to 1 greater than u's distance
-                    predecessor: u, // Set predecessor to u
-                    data: graph[v][1]
-                };
-
-                // Enqueue v
-                queue.enqueue(v);
+            if (graph[u][0][i] === null) {
+                // Skip over the null value in the 0th item in adjList
+            } else {
+                let v = graph[u][0][i];
+                // ...that has not been visited:
+                if (bfsInfo[v].distance === null) {
+                    
+                    bfsInfo[v] = {
+                        distance: bfsInfo[u].distance + 1, // Set distance to 1 greater than u's distance
+                        predecessor: u, // Set predecessor to u
+                        data: graph[v][1]
+                    };
+    
+                    // Enqueue v
+                    queue.enqueue(v);
+                }
             }
         }
     }
@@ -130,10 +136,8 @@ var doBFS = function (graph, source, sourceData) {
 };
 
 
-const knightMoves = (currentPosition, end, adjList = [], predecessor, movesToEnd = []) => {
+const buildAdjacencyList = (currentPosition, adjList = [], predecessor = null, currentIndex = 0) => {
     const currentKnight = Knight(currentPosition);
-    const currentIndex = adjList.length;
-
     let possibleMoves = [];
     let predecessorPosition;
 
@@ -141,9 +145,10 @@ const knightMoves = (currentPosition, end, adjList = [], predecessor, movesToEnd
     adjList[currentIndex] = [];
 
     // Add predecessor to adjaceny list
-    if (predecessor === undefined) {
+    if (predecessor === null) {
+        currentIndex = 0;
         possibleMoves = currentKnight.getPossiblePositions();
-        adjList[currentIndex].push([]);
+        adjList[currentIndex].push([null]);
     } else {
         // Prevent cycling by filtering out the previous move
         // from possible moves
@@ -155,7 +160,7 @@ const knightMoves = (currentPosition, end, adjList = [], predecessor, movesToEnd
         adjList[currentIndex].push([predecessor]);
     }
 
-    // Add current position to adjency list
+    // Add current position to adjacency list
     adjList[currentIndex][1] = currentPosition;
 
     let listLength;
@@ -166,28 +171,44 @@ const knightMoves = (currentPosition, end, adjList = [], predecessor, movesToEnd
         adjList[listLength] = [[currentIndex], move];
     })
 
-    // Do a breadth-first search on the adjacency list to get 
-    // distance and predecessor information for each possible move
-    // console.log(adjList)
-    const bfsInfo = doBFS(adjList, currentIndex, currentPosition);
+    adjList[currentIndex][2] = "visited";
 
-    // Check the BFS results for any moves with the end possiiton
-    // and return as an array
-    const endingMoves = checkBFSInfoForEndPos(bfsInfo, end);
+    return adjList;
+}
+
+
+const knightMoves = (currentPosition, end) => {
+    if (checkTwoPositionsEqual(currentPosition, end)) return "Start and end positions are the same.";
+    let adjList = buildAdjacencyList(currentPosition, [], null)
+    const currentIndex = adjList.length;
     
-    if (endingMoves.length === 0) {
-        return knightMoves(adjList[currentIndex+1][1], end, adjList, currentIndex, movesToEnd);
+    let bfsInfo = [];
+    while (!checkBFSInfoForEndPos(bfsInfo, end)) {
+        adjList.forEach((move, i) => {
+            if (move[2] !== 'visited') {
+                adjList = buildAdjacencyList(move[1], adjList, move[0][0], i);
+            }
+        })
+        bfsInfo = doBFS(adjList, currentIndex, currentPosition);
     }
 
-    if (movesToEnd.length === 0) {
-        movesToEnd = findPredecessorMoves(endingMoves[0], bfsInfo);
-    } else {
-        movesToEnd.unshift(findPredecessorMoves(endingMoves[0], bfsInfo));
-    }
+    const endMoves = returnBFSInfoForEndPos(bfsInfo, end);
+    const movesToEnd = findPredecessorsMoves(endMoves[0].data, endMoves[0].predecessor, adjList) ;
+
     return movesToEnd;
 }
 
 const checkBFSInfoForEndPos = (bfsInfo, end) => {
+    let result = false;
+    bfsInfo.forEach((move) => {
+        if (move.data === null) {
+
+        } else if (checkTwoPositionsEqual(move.data, end)) result = true;
+    });
+    return result;
+}
+
+const returnBFSInfoForEndPos = (bfsInfo, end) => {
     let endingMoves = [];
     bfsInfo.forEach((move) => {
         if (checkTwoPositionsEqual(move.data, end)) endingMoves.push(move)
@@ -199,11 +220,14 @@ const checkTwoPositionsEqual = (positionOne, positionTwo) => {
     return positionOne[0] === positionTwo[0] && positionOne[1] === positionTwo[1];
 }
 
-const findPredecessorMoves = (endMove, bfsInfo, movesToEnd = []) => {
-    const predecessor = endMove.predecessor;
-    movesToEnd.unshift(endMove.data);
-    if (predecessor !== null) return findPredecessorMoves(bfsInfo[predecessor], bfsInfo, movesToEnd);
+const findPredecessorsMoves = (endMovePosition, predecessorIndex, adjList, movesToEnd = []) => {
+    movesToEnd.unshift(endMovePosition);
+    if (predecessorIndex === null) {
+        return movesToEnd;
+    } else {  
+        const predecessorPosition = adjList[predecessorIndex][1];
+        const predecessorPredIndex = adjList[predecessorIndex][0][0];
+        findPredecessorsMoves(predecessorPosition, predecessorPredIndex, adjList, movesToEnd);
+    }
     return movesToEnd;
 }
-
-console.log("Final Result: ",knightMoves([0,0], [4,3]));
