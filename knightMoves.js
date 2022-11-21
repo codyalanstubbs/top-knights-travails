@@ -232,6 +232,12 @@ const findPredecessorsMoves = (endMovePosition, predecessorIndex, adjList, moves
     return movesToEnd;
 }
 
+let path = knightMoves([0,0], [6,7])
+path.forEach((move, i) => {
+    if (i === 0) console.log(`=> You made it in ${path.length-1} moves! Here's your path:`);
+    console.log('\t', move);
+});
+
 // Driver code to test out all possible combos of start and end positions
 let x = [0,1,2,3,4,5,6,7];
 let y = [0,1,2,3,4,5,6,7];
@@ -252,11 +258,10 @@ uniqueComboCombos.forEach((combo) => {
     const comb1 = [Number(combo.split("")[0]), Number(combo.split("")[1])];
     const comb2 = [Number(combo.split("")[2]), Number(combo.split("")[3])];
     (knightMoves(comb1, comb2).length !== 0) ? successCounts++ : failureCounts++;
-
 })
 
 
-console.log("Possible Start-End Combos: ", uniqueComboCombos.length)
+console.log("\nPossible Start-End Combos: ", uniqueComboCombos.length)
 console.log("Paths Found: ", successCounts)
 console.log("Paths Not Found: ", failureCounts)
 
