@@ -237,7 +237,6 @@ let x = [0,1,2,3,4,5,6,7];
 let y = [0,1,2,3,4,5,6,7];
 
 let combos = combineArrays([x, y] )
-console.log(combos.length)
 let uniqueCombos = combos.filter((c, index) => {
     return combos.indexOf(c) === index;
 });
@@ -257,9 +256,9 @@ uniqueComboCombos.forEach((combo) => {
 })
 
 
-console.log(uniqueComboCombos.length)
-console.log(successCounts)
-console.log(failureCounts)
+console.log("Possible Start-End Combos: ", uniqueComboCombos.length)
+console.log("Paths Found: ", successCounts)
+console.log("Paths Not Found: ", failureCounts)
 
 // The functions below come from https://stackoverflow.com/questions/8936610/how-can-i-create-every-combination-possible-for-the-contents-of-two-arrays
 // These are used above to test if all possible starting and ending position combos
